@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # AI Test Case Generator — v6
 
 A Flask web app that generates comprehensive, industry-standard test cases
@@ -77,3 +78,7 @@ ai_test_case_generator_v6/
 After generation, click **Download Excel (.xlsx)** to get a workbook with:
 - A cover sheet listing all requirements and total test count
 - One sheet per requirement with full test case table
+=======
+# ai-test-case-generator
+Developed a Flask-based web application that converts plain-English requirements into industry-standard test cases using AI-powered generation with a rule-based fallback. Integrated a results dashboard and one-click Excel export to streamline QA workflows and improve testing efficiency.
+>>>>>>> c36a2360993e959a352b62d4411d9caee34c364d
