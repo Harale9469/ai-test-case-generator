@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generated Test Cases</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="bg-cover bg-results"></div>
+  <div class="overlay"></div>
+
+  <div class="cover-layout">
+
+    <div class="cover-top results-top">
+      <h1 class="title">Test Cases</h1>
+      <div class="results-summary-bar">
+        <span class="results-summary-pill">
+          <span class="rs-label">Requirements</span>
+          <span class="rs-val">{{ all_requirements | length }}</span>
+        </span>
+        <span class="results-summary-pill">
+          <span class="rs-label">Total Test Cases</span>
+          <span class="rs-val">{{ total_cases }}</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="cover-middle">
+      <div class="middle-bg"></div>
+      <div class="middle-content results-content">
+
+        {% if generation_notice %}
+        <div class="generation-notice">
+          ⚠ {{ generation_notice }} Set the <code>ANTHROPIC_API_KEY</code> environment variable
+          before starting the app to get fully AI-tailored test cases for every requirement.
+        </div>
+        {% endif %}
+
+        {% for req in all_requirements %}
+        <div class="req-block">
+
+          <div class="req-block-header">
+            <div class="req-block-name">{{ req.req_name }}</div>
+            <div class="req-block-details">
+              <span class="req-block-details-label">Requirement Details</span>
+              <span class="req-block-details-text">{{ req.requirements }}</span>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  {% for col in columns %}
+                    <th>{{ col }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for tc in req.test_cases %}
+                <tr>
+                  <td class="id-cell">{{ tc["Sl. No."] }}</td>
+                  <td class="id-cell">{{ tc["TC ID"] }}</td>
+                  <td>{{ tc["TC Objective"] }}</td>
+                  <td>{{ tc["TC Description"] }}</td>
+                  <td class="steps-cell">{{ tc["TC Steps"] }}</td>
+                  <td>{{ tc["Test Data"] }}</td>
+                  <td>{{ tc["Expected Output"] }}</td>
+                  <td class="id-cell">{{ tc["Requirement ID"] }}</td>
+                  <td>
+                    {% set p = tc["Priority"] | lower %}
+                    <span class="badge {{ 'badge-high' if p == 'high' else ('badge-low' if p == 'low' else 'badge-medium') }}">
+                      {{ tc["Priority"] }}
+                    </span>
+                  </td>
+                  <td><span class="badge badge-status">{{ tc["Status"] }}</span></td>
+                  <td><span class="badge badge-status">{{ tc["Pass/Fail"] }}</span></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="req-block-footer">
+            {{ req.test_cases | length }} test case{{ 's' if req.test_cases | length != 1 else '' }}
+            for <strong>{{ req.req_name }}</strong>
+          </div>
+
+        </div>
+        {% endfor %}
+
+        <!-- Download via POST — payload injected via JS to avoid any HTML-encoding corruption -->
+        <div class="actions-row">
+          <form id="download-form" method="POST" action="{{ url_for('download') }}" style="margin:0;">
+            <input type="hidden" id="payload-input" name="payload" value="" />
+            <button type="button" class="btn btn-primary" onclick="submitDownload()">Download Excel (.xlsx)</button>
+          </form>
+          <a href="{{ url_for('index') }}" class="btn btn-secondary">New Requirement</a>
+        </div>
+
+        <script>
+          // Store raw JSON in a JS variable — never touches HTML attribute encoding
+          var _payload = {{ payload_json | tojson }};
+
+          function submitDownload() {
+            document.getElementById("payload-input").value = JSON.stringify(_payload);
+            document.getElementById("download-form").submit();
+          }
+        </script>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Test Case Generator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="bg-cover"></div>
+  <div class="overlay"></div>
+
+  <div class="cover-layout">
+    <div class="cover-top">
+      <h1 class="title">AI Test Case<br />Generator</h1>
+    </div>
+
+    <div class="cover-middle">
+      <div class="middle-bg"></div>
+      <div class="middle-content">
+
+        {% if error %}
+          <div class="error-box">{{ error }}</div>
+        {% endif %}
+
+        <form class="card" action="{{ url_for('generate') }}" method="post" autocomplete="off">
+
+          <!-- All requirement rows live here -->
+          <div id="requirements-list"></div>
+
+          <!-- Add button -->
+          <div style="margin-top:12px;">
+            <button type="button" id="add-req-btn" class="btn btn-secondary btn-add">
+              + Add Requirement
+            </button>
+          </div>
+
+          <!-- Submit -->
+          <div style="margin-top:22px;">
+            <button type="submit" class="btn btn-primary btn-full">Generate Test Cases</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Single requirement row template -->
+  <template id="req-row-tpl">
+    <div class="req-row">
+
+      <div class="req-row-header">
+        <span class="req-row-num">REQUIREMENT 1</span>
+        <button type="button" class="btn-remove-req" title="Remove this requirement" style="display:none;">✕</button>
+      </div>
+
+      <div class="field" style="margin-bottom:14px;">
+        <label>Requirement Name</label>
+        <input
+          type="text"
+          name="req_name[]"
+          placeholder="e.g. User Login and Authentication"
+          autocomplete="off"
+          spellcheck="false"
+          required
+        />
+      </div>
+
+      <div class="field">
+        <label>Requirement Details</label>
+        <textarea
+          name="requirements[]"
+          placeholder="Describe what the system should do — features, user roles, inputs, validation rules, expected behaviors, edge cases, etc."
+          autocomplete="off"
+          required
+        ></textarea>
+      </div>
+
+    </div>
+  </template>
+
+  <script>
+    const list   = document.getElementById('requirements-list');
+    const tpl    = document.getElementById('req-row-tpl');
+    const addBtn = document.getElementById('add-req-btn');
+
+    function renumber() {
+      const rows = list.querySelectorAll('.req-row');
+      const count = rows.length;
+      rows.forEach((row, i) => {
+        row.querySelector('.req-row-num').textContent = 'REQUIREMENT ' + (i + 1);
+        row.querySelector('.btn-remove-req').style.display = count > 1 ? 'flex' : 'none';
+      });
+    }
+
+    function addRow(prefill) {
+      const clone = tpl.content.cloneNode(true);
+      const block = clone.querySelector('.req-row');
+
+      block.querySelector('.btn-remove-req').addEventListener('click', function () {
+        block.remove();
+        renumber();
+      });
+
+      if (prefill) {
+        block.querySelector('input[name="req_name[]"]').value        = prefill.req_name     || '';
+        block.querySelector('textarea[name="requirements[]"]').value = prefill.requirements || '';
+      }
+
+      list.appendChild(clone);
+      renumber();
+    }
+
+    addBtn.addEventListener('click', () => addRow());
+
+    // On validation error re-populate; otherwise start with one blank row
+    const prefill = {{ prefill | tojson }};
+    if (prefill && prefill.length) {
+      prefill.forEach(p => addRow(p));
+    } else {
+      addRow();
+    }
+  </script>
+</body>
+</html>
